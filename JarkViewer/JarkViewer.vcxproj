@@ -157,6 +157,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\avif\avif.h" />
+    <ClInclude Include="include\blpDecoder.h" />
     <ClInclude Include="include\channel.h" />
     <ClInclude Include="include\D2D1App.h" />
     <ClInclude Include="include\exifParse.h" />
@@ -250,6 +251,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\videoDecoder.h" />
+    <ClCompile Include="src\blpDecoder.cpp" />
     <ClCompile Include="src\D2D1App.cpp" />
     <ClCompile Include="src\exifParse.cpp" />
     <ClCompile Include="src\ImageDatabase.cpp" />

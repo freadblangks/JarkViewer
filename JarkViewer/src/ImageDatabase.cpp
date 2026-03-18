@@ -10,6 +10,8 @@
 #include "qoi.h"
 #endif
 
+#include "blpDecoder.h"
+
 class MappedFileReader {
 public:
     explicit MappedFileReader(std::wstring_view path) {
@@ -1903,6 +1905,24 @@ cv::Mat ImageDatabase::loadPCX(wstring_view path, std::span<const uint8_t> buf) 
     return result;
 }
 
+cv::Mat ImageDatabase::loadBLP(std::wstring_view path, std::span<const uint8_t> buf) {
+    if (buf.size() < 4) {
+        JARK_LOG("[ERROR] BLP: buffer too small to contain magic ({} bytes)", buf.size());
+        return {};
+    }
+
+    uint32_t magic = 0;
+    std::memcpy(&magic, buf.data(), sizeof(magic));
+
+    const blpDecoder::BufView view{ buf.data(), buf.size() };
+
+    if (magic == blpDecoder::kMagicBLP1) return decodeBLP1(view);
+    if (magic == blpDecoder::kMagicBLP2) return decodeBLP2(view);
+
+    JARK_LOG("[ERROR] BLP: unrecognised magic 0x{:08X}", magic);
+    return {};
+}
+
 static std::tuple<std::vector<uint8_t>, std::vector<uint8_t>, std::string> unzipLivp(std::span<const uint8_t> livpFileBuff) {
     zlib_filefunc_def memory_filefunc;
     memset(&memory_filefunc, 0, sizeof(zlib_filefunc_def));
@@ -2379,6 +2399,13 @@ ImageAsset ImageDatabase::myLoader(const wstring& path) {
     }
     else if (ext == L"pcx") {
         img = loadPCX(path, fileBuf);
+        exifInfo = ExifParse::getSimpleInfo(path, img.cols, img.rows, fileBuf.data(), fileBuf.size());
+        if (img.empty()) {
+            img = getErrorTipsMat();
+        }
+    }
+    else if (ext == L"blp") {
+        img = loadBLP(path, fileBuf);
         exifInfo = ExifParse::getSimpleInfo(path, img.cols, img.rows, fileBuf.data(), fileBuf.size());
         if (img.empty()) {
             img = getErrorTipsMat();

@@ -251,7 +251,7 @@ public:
         L"exr", L"tiff", L"tif", L"webp", L"hdr", L"pic",
         L"heic", L"heif", L"avif", L"avifs", L"gif", L"jxl",
         L"ico", L"icon", L"psd", L"tga", L"svg", L"jfif",
-        L"jxr", L"wp2", L"pfm", L"livp", L"qoi",
+        L"jxr", L"wp2", L"pfm", L"livp", L"qoi", L"blp",
         L"pcx", 
     };
 
@@ -478,6 +478,7 @@ public:
     cv::Mat loadPFM(wstring_view path, std::span<const uint8_t> buf);
     cv::Mat loadQOI(wstring_view path, std::span<const uint8_t> buf);
     cv::Mat loadPCX(wstring_view path, std::span<const uint8_t> buf);
+    cv::Mat loadBLP(wstring_view path, std::span<const uint8_t> buf);
     cv::Mat loadHeic(wstring_view path, std::span<const uint8_t> buf);
     cv::Mat loadRaw(wstring_view path, std::span<const uint8_t> buf);
 

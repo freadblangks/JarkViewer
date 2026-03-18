@@ -5,6 +5,7 @@
 [![SourceForge](https://img.shields.io/badge/SourceForge-Download-orange)](https://sourceforge.net/projects/jarkviewer.mirror/)
 ![License](https://img.shields.io/github/license/jark006/JarkViewer)
 ![Platform](https://img.shields.io/badge/OS-Windows%2010/11%2064%20bit-00adef.svg)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/jark006/JarkViewer)
 
 [中文](README.md) | English
 

@@ -294,6 +294,9 @@
     <ClInclude Include="include\stringRes.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\blpDecoder.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -324,6 +327,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\videoDecoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\blpDecoder.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
