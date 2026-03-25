@@ -2285,6 +2285,37 @@ ImageAsset ImageDatabase::myLoader(const wstring& path) {
         }
         return imageAsset;
     }
+    else if (ext == L"webm") { //静态或动画
+        ImageAsset imageAsset;
+        auto frames = DecodeVideoFrames(fileBuf.data(), fileBuf.size());
+
+        if (frames.empty()) {
+            imageAsset.format = ImageFormat::Still;
+            imageAsset.primaryFrame = loadImageWinCOM(path, fileBuf);
+            if (imageAsset.primaryFrame.empty()) {
+                imageAsset.primaryFrame = getErrorTipsMat();
+                imageAsset.exifInfo = ExifParse::getSimpleInfo(path, 0, 0, fileBuf.data(), fileBuf.size());
+            }
+            else {
+                imageAsset.exifInfo = ExifParse::getSimpleInfo(path, imageAsset.primaryFrame.cols, imageAsset.primaryFrame.rows,
+                    fileBuf.data(), fileBuf.size());
+            }
+        }
+        else if (frames.size() == 1) {
+            imageAsset.format = ImageFormat::Still;
+            imageAsset.primaryFrame = std::move(frames[0]);
+            imageAsset.exifInfo = ExifParse::getSimpleInfo(path, imageAsset.primaryFrame.cols, imageAsset.primaryFrame.rows,
+                fileBuf.data(), fileBuf.size());
+        }
+        else {
+            imageAsset.format = ImageFormat::Animated;
+            imageAsset.frames = std::move(frames);
+            imageAsset.frameDurations = std::vector<int>(imageAsset.frames.size(), 33);
+            imageAsset.exifInfo = ExifParse::getSimpleInfo(path, imageAsset.frames[0].cols, imageAsset.frames[0].rows, fileBuf.data(), fileBuf.size())
+                + ExifParse::getExif(path, fileBuf.data(), fileBuf.size());
+        }
+        return imageAsset;
+    }
     else if (ext == L"wp2") { // webp2 静态或动画
         auto imageAsset = loadWP2(path, fileBuf);
         if (imageAsset.format == ImageFormat::None) {

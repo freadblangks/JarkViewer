@@ -252,7 +252,7 @@ public:
         L"heic", L"heif", L"avif", L"avifs", L"gif", L"jxl",
         L"ico", L"icon", L"psd", L"tga", L"svg", L"jfif",
         L"jxr", L"wp2", L"pfm", L"livp", L"qoi", L"blp",
-        L"pcx", 
+        L"pcx", L"webm",
     };
 
     static inline const unordered_set<wstring_view> supportRaw{

@@ -486,11 +486,9 @@ LRESULT D2D1App::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
     }
     break;
 
-    //#ifndef NDEBUG
-    //    default: {
-    //        JARK_LOG("{} message: 0x{:04x}", __FUNCTION__, (uint64_t)message);
-    //    }break;
-    //#endif
+    //default: {
+    //    JARK_LOG("{} message: 0x{:04x}", __FUNCTION__, (uint64_t)message);
+    //}break;
     }
 
     return DefWindowProcW(hwnd, message, wParam, lParam);

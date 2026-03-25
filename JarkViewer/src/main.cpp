@@ -431,11 +431,9 @@ public:
             return;
         }
 
-#ifndef NDEBUG
         default: {
             JARK_LOG("{} KeyValue: 0x{:04x}", __FUNCTION__, (uint64_t)btnState);
         }break;
-#endif // NDEBUG
         }
     }
 
@@ -469,11 +467,9 @@ public:
             return;
         }
 
-#ifndef NDEBUG
         default: {
             JARK_LOG("{} KeyValue: 0x{:04x}", __FUNCTION__, (uint64_t)btnState);
         }break;
-#endif // NDEBUG
         }
     }
 
@@ -851,11 +847,9 @@ public:
                 operateQueue.push({ ActionENUM::deleteImg });
             }
 
-#ifndef NDEBUG
             default: {
                 JARK_LOG("{} KeyValue: 0x{:04x}", __FUNCTION__, (uint64_t)keyValue);
             }break;
-#endif // NDEBUG
             }
         }
     }
@@ -867,11 +861,9 @@ public:
             ctrlIsPressing = false;
         }break;
 
-#ifndef NDEBUG
         default: {
             JARK_LOG("{} KeyValue: 0x{:04x}", __FUNCTION__, (uint64_t)keyValue);
         }break;
-#endif // NDEBUG
         }
     }
 
