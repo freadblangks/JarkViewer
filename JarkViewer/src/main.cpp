@@ -258,7 +258,7 @@ public:
             return S_FALSE;
 
         jarkUtils::setWindowIcon(m_hWnd, IDI_JARKVIEWER);
-        GlobalVar::theme = GlobalVar::CURRENT_UI_MODE == 1 ? lightTheme : deepTheme;
+        GlobalVar::currentTheme = GlobalVar::isCurrentUIDarkMode ? deepTheme : lightTheme;
         return S_OK;
     }
 
@@ -1004,7 +1004,7 @@ public:
         if (srcPx[3] == 255) return srcPx.u32;
 
         intUnion bgPx = ((mainX / BG_GRID_WIDTH + mainY / BG_GRID_WIDTH) & 1) ? 
-            GlobalVar::theme.BLACK_GRID_COLOR : GlobalVar::theme.WHITE_GRID_COLOR;
+            GlobalVar::currentTheme.BLACK_GRID : GlobalVar::currentTheme.WHITE_GRID;
         if (srcPx[3] == 0) return bgPx.u32;
 
         const int alpha = srcPx[3];
@@ -1067,14 +1067,14 @@ public:
 
         uint32_t* ptrStart = (uint32_t*)canvas.ptr();
         uint32_t* ptrEnd = ptrStart + canvasH * canvasW;
-        std::fill(ptrStart, ptrEnd, GlobalVar::theme.BG_COLOR);
+        std::fill(ptrStart, ptrEnd, GlobalVar::currentTheme.BG);
 
         if (((srcH == 600 and srcW == 800) or (srcH == 800 and srcW == 600)) and 
             (*((uint32_t*)srcImg.ptr()) == 0xFF464646) or(*((uint32_t*)srcImg.ptr()) == 0xFFEEEEEE)) {
             // 内置的用于提示的图像
         }
         else { // 普通图像  画边框
-            const uint32_t lineColor = GlobalVar::CURRENT_UI_MODE == 1 ? 0xFF000000 : 0xFF888888;
+            const uint32_t lineColor = GlobalVar::isCurrentUIDarkMode ? 0xFF888888 : 0xFF000000;
             if (0 < xStart and xStart < canvasW) {
                 const int yMax = std::min(yEnd + 1, canvasH);
                 for (int y = std::max(yStart - 1, 0); y < yMax; y++) {
@@ -1242,7 +1242,7 @@ public:
         cv::Mat rotatedImage;
         cv::warpAffine(image, rotatedImage, rotationMatrix, image.size(),
             cv::INTER_LINEAR, cv::BORDER_CONSTANT, 
-            cv::Scalar(GlobalVar::theme.BG_COLOR, GlobalVar::theme.BG_COLOR, GlobalVar::theme.BG_COLOR));
+            cv::Scalar(GlobalVar::currentTheme.BG, GlobalVar::currentTheme.BG, GlobalVar::currentTheme.BG));
 
         return rotatedImage;
     }
@@ -1256,7 +1256,7 @@ public:
         if (maxEdge < 2)
             return;
         auto tmpCanvas = cv::Mat(maxEdge, maxEdge, CV_8UC4, 
-            cv::Vec4b(GlobalVar::theme.BG_COLOR, GlobalVar::theme.BG_COLOR, GlobalVar::theme.BG_COLOR));
+            cv::Vec4b(GlobalVar::currentTheme.BG, GlobalVar::currentTheme.BG, GlobalVar::currentTheme.BG));
 
         cv::Mat srcImg;
         if (curPar.imageAssetPtr->format == ImageFormat::None || curPar.imageAssetPtr->format == ImageFormat::Still)
@@ -1288,7 +1288,7 @@ public:
         if (maxEdge < 2)
             return;
         auto tmpCanvas = cv::Mat(maxEdge, maxEdge, CV_8UC4, 
-            cv::Vec4b(GlobalVar::theme.BG_COLOR, GlobalVar::theme.BG_COLOR, GlobalVar::theme.BG_COLOR));
+            cv::Vec4b(GlobalVar::currentTheme.BG, GlobalVar::currentTheme.BG, GlobalVar::currentTheme.BG));
 
         cv::Mat srcImg;
         if (curPar.imageAssetPtr->format == ImageFormat::None || curPar.imageAssetPtr->format == ImageFormat::Still)
@@ -1532,8 +1532,7 @@ public:
             const int padding = 10;
             const int areaWidth = (canvas.cols - 2 * padding) / 4;
             cv::Rect rect{ padding, padding, std::max(areaWidth, 400), canvas.rows - 2 * padding };
-            textDrawer.putAlignLeft(canvas, rect, curPar.imageAssetPtr->exifInfo.c_str(), 
-                GlobalVar::CURRENT_UI_MODE == 1 ? cv::Vec4b{ 0, 0, 0, 255 } : cv::Vec4b{ 255, 255, 255, 255 }); // 长文本 8ms
+            textDrawer.putAlignLeft(canvas, rect, curPar.imageAssetPtr->exifInfo.c_str(), GlobalVar::currentTheme.FG);
         }
     }
 
@@ -1608,11 +1607,9 @@ public:
     void DrawScene() {
         if (GlobalVar::isNeedUpdateTheme) {
             GlobalVar::isNeedUpdateTheme = false;
-            GlobalVar::theme = GlobalVar::CURRENT_UI_MODE == 1 ? lightTheme : deepTheme;
-            operateQueue.push({ ActionENUM::normalFresh });
-
-            BOOL themeMode = GlobalVar::CURRENT_UI_MODE == 1 ? 0 : 1;
+            BOOL themeMode = GlobalVar::isCurrentUIDarkMode;
             DwmSetWindowAttribute(m_hWnd, DWMWINDOWATTRIBUTE::DWMWA_USE_IMMERSIVE_DARK_MODE, &themeMode, sizeof(BOOL));
+            operateQueue.push({ ActionENUM::normalFresh });
         }
 
         auto operateAction = operateQueue.get();

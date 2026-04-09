@@ -95,13 +95,28 @@ using std::unordered_map;
 #include "stringRes.h"
 
 struct ThemeColor {
-    uint32_t BG_COLOR;
-    uint32_t BLACK_GRID_COLOR;
-    uint32_t WHITE_GRID_COLOR;
+    uint32_t FG_LIGHT;   // 文字颜色 浅
+    uint32_t FG;         // 文字颜色
+    uint32_t FG_DEEP;    // 文字颜色 深
+    uint32_t BG_LIGHT;   // 背景颜色 浅
+    uint32_t BG;         // 背景颜色
+    uint32_t BG_DEEP;    // 背景颜色 深
+
+    uint32_t BG_TAG;     // 标签栏背景
+    uint32_t BG_BTN;     // 按钮背景
+    uint32_t CHECK;      // 选中背景
+    uint32_t BLACK_GRID; // 深色棋盘格子
+    uint32_t WHITE_GRID; // 浅色棋盘格子
 };
 
-inline constexpr ThemeColor deepTheme{ 0xFF1F2024, 0xFF282828, 0xFF3C3C3C };
-inline constexpr ThemeColor lightTheme{ 0xFFF1F3F9, 0xFFDDDDDD, 0xFFFFFFFF };
+inline constexpr ThemeColor deepTheme{
+    0xFFF6F8FE, 0xFFF1F3F9, 0xFFECEEF4, 0xFF666666, 0xFF1F2024, 0xFF1A1B1F,
+    0xFF666666, 0xFF666666, 0xFF006AA4, 0xFF282828, 0xFF3C3C3C
+};
+inline constexpr ThemeColor lightTheme{
+    0xFF666666, 0xFF1F2024, 0xFF1A1B1F, 0xFFF6F8FE, 0xFFF1F3F9, 0xFFECEEF4,
+    0xFFCDD7E8, 0xFFCDD7E8, 0xFF4CC2FF, 0xFFDDDDDD, 0xFFFFFFFF
+};
 
 // 不要随意更改此结构体的成员顺序或大小，否则会导致设置文件无法兼容
 // 设置文件大小固定为4096字节
@@ -427,9 +442,9 @@ struct MatPack {
 struct GlobalVar {
     static inline bool isNeedUpdateTheme = false;
 
-    static inline BOOL isSystemDarkMode = 0;
-    static inline ThemeColor theme = deepTheme;
-    static inline int CURRENT_UI_MODE = 1; // 界面主题  1:浅色  2:深色
+    static inline bool isSystemDarkMode = false;    // 系统界面主题：深色/浅色
+    static inline bool isCurrentUIDarkMode = false; // 应用实时界面主题：深色/浅色
+    static inline ThemeColor currentTheme = deepTheme;
 
     static inline wstring settingPath;
     static inline string_view settingHeader{ "JarkViewerSetting" };
@@ -466,6 +481,8 @@ public:
     }
 
     static string bin2Hex(const void* bytes, const size_t len);
+
+    static cv::Scalar to_cv_scalar(uint32_t color);
 
     static std::wstring ansiToWstring(string_view str);
 

@@ -380,8 +380,8 @@ public:
         jarkUtils::overlayImg(squareMat, buttonPrint, 600, 0);
         jarkUtils::overlayImg(squareMat, trackbarBg, 0, 50);
 
-        textDrawer.putAlignLeft(squareMat, { 120, 60, 200, 900 }, std::format("{:3} %", params.brightness).c_str(), { 0, 0, 0, 255 });
-        textDrawer.putAlignLeft(squareMat, { 120, 110, 200, 900 }, std::format("{:3} %", params.contrast).c_str(), { 0, 0, 0, 255 });
+        textDrawer.putAlignLeft(squareMat, { 120, 60, 200, 900 }, std::format("{:3} %", params.brightness).c_str(), GlobalVar::currentTheme.FG);
+        textDrawer.putAlignLeft(squareMat, { 120, 110, 200, 900 }, std::format("{:3} %", params.contrast).c_str(), GlobalVar::currentTheme.FG);
 
         drawProgressBar(squareMat, { 250, 60, 500, 30 }, params.brightness / 200.0);
         drawProgressBar(squareMat, { 250, 110, 500, 30 }, params.contrast / 200.0);
@@ -557,7 +557,7 @@ public:
                 SendMessageW(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
                 SendMessageW(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
             }
-            BOOL themeMode = GlobalVar::CURRENT_UI_MODE == 1 ? 0 : 1;
+            BOOL themeMode = GlobalVar::isCurrentUIDarkMode;
             DwmSetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE::DWMWA_USE_IMMERSIVE_DARK_MODE, &themeMode, sizeof(BOOL));
         }
 

@@ -15,6 +15,14 @@ std::string jarkUtils::bin2Hex(const void* bytes, const size_t len) {
     return res;
 }
 
+cv::Scalar jarkUtils::to_cv_scalar(uint32_t color) {
+    uint8_t a = (color >> 24) & 0xFF;
+    uint8_t r = (color >> 16) & 0xFF;
+    uint8_t g = (color >> 8) & 0xFF;
+    uint8_t b = color & 0xFF;
+    return cv::Scalar(b, g, r, a);
+}
+
 std::wstring jarkUtils::ansiToWstring(string_view str) {
     if (str.empty())return L"";
 

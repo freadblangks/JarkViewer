@@ -37,6 +37,8 @@ private:
     static const int tabHeight = 50;
     static const int tabWidth = 150;
 
+    static const int DEBUG_COLOR = 0xFFFF8080;
+
     static inline const cv::Rect jarkBtnRect{ 440, 100, 520, 120 };
     static inline const cv::Rect reposityBtnRect{ 440, 280, 520, 90 };
     static inline const cv::Rect baiduBtnRect{ 440, 380, 520, 116 };
@@ -56,7 +58,7 @@ private:
 
     void Init(int tabIdx = 0) {
         textDrawer.setSize(24);
-        winCanvas = cv::Mat(winHeight, winWidth, CV_8UC4, cv::Scalar(240, 240, 240, 240));
+        winCanvas = cv::Mat(winHeight, winWidth, CV_8UC4, jarkUtils::to_cv_scalar(GlobalVar::currentTheme.BG));
         curTabIdx = tabIdx;
 
         rcFileInfo rc;
@@ -125,32 +127,22 @@ public:
         requestExitFlag = true;
     }
 
-    void drawProgressBar(cv::Mat& image, cv::Rect rect, double progress) {
-        cv::rectangle(image, rect, cv::Scalar(255, 0, 0, 255), 2);
-
-        const int progresswidth = static_cast<int>(rect.width * progress);
-        if (0 < progresswidth && progresswidth <= rect.width) {
-            rect.width = progresswidth;
-            cv::rectangle(image, rect, cv::Scalar(204, 72, 63, 255), -1);
-        }
-    }
-
     void refreshGeneralTab() {
-        cv::rectangle(winCanvas, { 0, tabHeight, winWidth, winHeight - tabHeight }, cv::Scalar(240, 240, 240, 255), -1);
+        cv::rectangle(winCanvas, { 0, tabHeight, winWidth, winHeight - tabHeight }, jarkUtils::to_cv_scalar(GlobalVar::currentTheme.BG), -1);
 
         for (auto& cbox : generalTabCheckBoxList) {
 #ifndef NDEBUG
-            cv::rectangle(winCanvas, cbox.rect, cv::Scalar(40, 40, 255, 255), 1);
+            cv::rectangle(winCanvas, cbox.rect, jarkUtils::to_cv_scalar(DEBUG_COLOR), 1);
 #endif
             cv::Rect rect({ cbox.rect.x + 8, cbox.rect.y + 8, cbox.rect.height - 16, cbox.rect.height - 16 }); //方形
-            cv::rectangle(winCanvas, rect, cv::Scalar(0, 0, 0, 255), 4);
+            cv::rectangle(winCanvas, rect, jarkUtils::to_cv_scalar(GlobalVar::currentTheme.FG_DEEP), 4);
             if (*cbox.valuePtr) {
                 rect = { cbox.rect.x + 14, cbox.rect.y + 14, cbox.rect.height - 28, cbox.rect.height - 28 }; //小方形
-                cv::rectangle(winCanvas, rect, cv::Scalar(255, 200, 120, 255), -1);
+                cv::rectangle(winCanvas, rect, jarkUtils::to_cv_scalar(GlobalVar::currentTheme.CHECK), -1);
             }
 
             rect = { cbox.rect.x + cbox.rect.height, cbox.rect.y+8, cbox.rect.width - cbox.rect.height, cbox.rect.height };
-            textDrawer.putAlignLeft(winCanvas, rect, getUIString(cbox.stringID), cv::Scalar(0, 0, 0, 255));
+            textDrawer.putAlignLeft(winCanvas, rect, getUIString(cbox.stringID), GlobalVar::currentTheme.FG);
         }
 
         for (auto& radio : generalTabRadioList) {
@@ -158,18 +150,18 @@ public:
             if (idx >= radio.stringIDs.size())
                 idx = 0;
 #ifndef NDEBUG
-            cv::rectangle(winCanvas, radio.rect, cv::Scalar(40, 40, 255, 255), 1);
+            cv::rectangle(winCanvas, radio.rect, jarkUtils::to_cv_scalar(DEBUG_COLOR), 1);
 #endif
             int itemWidth = radio.rect.width / radio.stringIDs.size();
             cv::Rect rect1 = { radio.rect.x + itemWidth * (1 + idx) , radio.rect.y + 4, itemWidth, radio.rect.height - 6 }; // 当前项背景框
-            cv::rectangle(winCanvas, rect1, cv::Scalar(255, 230, 150, 255), -1);
+            cv::rectangle(winCanvas, rect1, jarkUtils::to_cv_scalar(GlobalVar::currentTheme.CHECK), -1);
 
             cv::Rect rect2 = { radio.rect.x + itemWidth , radio.rect.y + 4, radio.rect.width - itemWidth, radio.rect.height - 6 }; //大框
-            cv::rectangle(winCanvas, rect2, cv::Scalar(0, 0, 0, 255), 2);
+            cv::rectangle(winCanvas, rect2, jarkUtils::to_cv_scalar(GlobalVar::currentTheme.FG_DEEP), 2);
 
             for (int i = 0; i < radio.stringIDs.size(); i++) {
                 cv::Rect rect3 = { radio.rect.x + itemWidth * (i), radio.rect.y , itemWidth, radio.rect.height };
-                textDrawer.putAlignCenter(winCanvas, rect3, getUIString(radio.stringIDs[i]), cv::Scalar(0, 0, 0, 255));
+                textDrawer.putAlignCenter(winCanvas, rect3, getUIString(radio.stringIDs[i]), GlobalVar::currentTheme.FG);
             }
         }
 
@@ -179,12 +171,12 @@ public:
                 labelBox.rect.y,
                 labelBox.rect.width - labelBox.rect.height,
                 labelBox.rect.height };
-            textDrawer.putAlignCenter(winCanvas, rect, labelBox.text.data(), cv::Scalar(0, 0, 0, 255));
+            textDrawer.putAlignCenter(winCanvas, rect, labelBox.text.data(), GlobalVar::currentTheme.FG);
         }
     }
 
     void refreshAssociateTab() {
-        cv::rectangle(winCanvas, { 0, tabHeight, winWidth, winHeight - tabHeight }, cv::Scalar(240, 240, 240, 255), -1);
+        cv::rectangle(winCanvas, { 0, tabHeight, winWidth, winHeight - tabHeight }, jarkUtils::to_cv_scalar(GlobalVar::currentTheme.BG), -1);
 
         // 需和 handleAssociateTab 参数保持一致
         const int xOffset = 20, yOffset = 70;
@@ -208,20 +200,20 @@ public:
             cv::Rect rect({ xOffset + gridWidth * x, yOffset + gridHeight * y, gridWidth, gridHeight });
             if (checkedExt.contains(ext)) {
                 cv::Rect rect2{ rect.x + 2, rect.y + 4, rect.width - 4, rect.height - 4 };
-                cv::rectangle(winCanvas, rect2, cv::Scalar(255, 230, 150, 255), -1);
+                cv::rectangle(winCanvas, rect2, jarkUtils::to_cv_scalar(GlobalVar::currentTheme.CHECK), -1);
             }
-            textDrawer.putAlignCenter(winCanvas, rect, ext.c_str(), cv::Scalar(0, 0, 0, 255));
+            textDrawer.putAlignCenter(winCanvas, rect, ext.c_str(), GlobalVar::currentTheme.FG);
             idx++;
         }
 
         for (int i = 0; i < 4; i++) {
             const cv::Rect& rect = btnRectList[i];
             cv::Rect rect2{ rect.x + 4, rect.y + 8, rect.width - 8, rect.height - 12 };
-            cv::rectangle(winCanvas, rect2, cv::Scalar(200, 200, 200, 255), -1);
-            textDrawer.putAlignCenter(winCanvas, rect, getUIString(btnTextList[i]), cv::Scalar(0, 0, 0, 255));
+            cv::rectangle(winCanvas, rect2, jarkUtils::to_cv_scalar(GlobalVar::currentTheme.BG_BTN), -1);
+            textDrawer.putAlignCenter(winCanvas, rect, getUIString(btnTextList[i]), GlobalVar::currentTheme.FG);
         }
 
-        textDrawer.putAlignLeft(winCanvas, { 20, winHeight - 200, winWidth - 20, winHeight }, getUIString(11), cv::Scalar(0, 0, 0, 255));
+        textDrawer.putAlignLeft(winCanvas, { 20, winHeight - 200, winWidth - 20, winHeight }, getUIString(11), GlobalVar::currentTheme.FG);
     }
 
     void refreshHelpTab() {
@@ -235,21 +227,21 @@ public:
         textDrawer.putAlignCenter(winCanvas, { 0, 600, 400, 40 }, jarkUtils::COMPILE_DATE_TIME, { 186, 38, 60, 255 });
 
 #ifndef NDEBUG
-        cv::rectangle(winCanvas, jarkBtnRect, cv::Scalar(40, 40, 255, 255), 1);
-        cv::rectangle(winCanvas, reposityBtnRect, cv::Scalar(40, 40, 255, 255), 1);
-        cv::rectangle(winCanvas, baiduBtnRect, cv::Scalar(40, 40, 255, 255), 1);
-        cv::rectangle(winCanvas, lanzouBtnRect, cv::Scalar(40, 40, 255, 255), 1);
+        cv::rectangle(winCanvas, jarkBtnRect, jarkUtils::to_cv_scalar(DEBUG_COLOR), 1);
+        cv::rectangle(winCanvas, reposityBtnRect, jarkUtils::to_cv_scalar(DEBUG_COLOR), 1);
+        cv::rectangle(winCanvas, baiduBtnRect, jarkUtils::to_cv_scalar(DEBUG_COLOR), 1);
+        cv::rectangle(winCanvas, lanzouBtnRect, jarkUtils::to_cv_scalar(DEBUG_COLOR), 1);
 #endif
     }
 
     void refreshUI() {
         // 绘制标签栏
-        cv::rectangle(winCanvas, { 0, 0, winWidth, tabHeight }, cv::Scalar(200, 200, 200, 255), -1);
-        cv::rectangle(winCanvas, { curTabIdx * tabWidth, 0, tabWidth, tabHeight }, cv::Scalar(240, 240, 240, 255), -1);
-        textDrawer.putAlignCenter(winCanvas, { 0, 0,150, 50 }, getUIString(2), { 0, 0, 0, 255 });
-        textDrawer.putAlignCenter(winCanvas, { 150, 0,150, 50 }, getUIString(3), { 0, 0, 0, 255 });
-        textDrawer.putAlignCenter(winCanvas, { 300, 0,150, 50 }, getUIString(4), { 0, 0, 0, 255 });
-        textDrawer.putAlignCenter(winCanvas, { 450, 0,150, 50 }, getUIString(5), { 0, 0, 0, 255 });
+        cv::rectangle(winCanvas, { 0, 0, winWidth, tabHeight }, jarkUtils::to_cv_scalar(GlobalVar::currentTheme.BG_TAG), -1);
+        cv::rectangle(winCanvas, { curTabIdx * tabWidth, 0, tabWidth, tabHeight }, jarkUtils::to_cv_scalar(GlobalVar::currentTheme.BG), -1);
+        textDrawer.putAlignCenter(winCanvas, { 0, 0,150, 50 }, getUIString(2), GlobalVar::currentTheme.FG);
+        textDrawer.putAlignCenter(winCanvas, { 150, 0,150, 50 }, getUIString(3), GlobalVar::currentTheme.FG);
+        textDrawer.putAlignCenter(winCanvas, { 300, 0,150, 50 }, getUIString(4), GlobalVar::currentTheme.FG);
+        textDrawer.putAlignCenter(winCanvas, { 450, 0,150, 50 }, getUIString(5), GlobalVar::currentTheme.FG);
 
         switch (curTabIdx) {
         case 0:refreshGeneralTab(); break;
@@ -276,14 +268,15 @@ public:
                     int clickIdx = (x - radio.rect.x) / itemWidth - 1;
                     if (0 <= clickIdx && clickIdx < radio.stringIDs.size() - 1) {
                         *radio.valuePtr = clickIdx;
-                        isNeedRefreshUI = true;
 
                         if (radio.stringIDs.front() == 24) { // UI_Mode 颜色主题改变
-                            GlobalVar::isNeedUpdateTheme = true;
-                            GlobalVar::CURRENT_UI_MODE = GlobalVar::settingParameter.UI_Mode == 0 ?
-                                (GlobalVar::isSystemDarkMode ? 2 : 1) : GlobalVar::settingParameter.UI_Mode;
+                            GlobalVar::isCurrentUIDarkMode = GlobalVar::settingParameter.UI_Mode == 0 ?
+                                GlobalVar::isSystemDarkMode : (GlobalVar::settingParameter.UI_Mode == 2);
+                            GlobalVar::currentTheme = GlobalVar::isCurrentUIDarkMode ? deepTheme : lightTheme;
                             updateWindowAttribute();
+                            GlobalVar::isNeedUpdateTheme = true;
                         }
+                        isNeedRefreshUI = true;
                     }
                 }
             }
@@ -458,7 +451,7 @@ public:
     }
 
     static void updateWindowAttribute() {
-        BOOL themeMode = GlobalVar::CURRENT_UI_MODE == 1 ? 0 : 1;
+        BOOL themeMode = GlobalVar::isCurrentUIDarkMode;
         DwmSetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE::DWMWA_USE_IMMERSIVE_DARK_MODE, &themeMode, sizeof(BOOL));
     }
 

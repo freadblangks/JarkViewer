@@ -21,7 +21,7 @@ void TextDrawer::setSize(int newSize) {
 }
 
 // str : UTF-8
-void TextDrawer::putText(cv::Mat& img, const int x, const int y, const char* str, const cv::Vec4b& color) {
+void TextDrawer::putText(cv::Mat& img, const int x, const int y, const char* str, intUnion color) {
     if (!hasInit) {
         Init(IDR_TTF_DEFAULT, L"TTF");
         hasInit = true;
@@ -67,7 +67,7 @@ void TextDrawer::putText(cv::Mat& img, const int x, const int y, const char* str
 }
 
 //Rect {x, y, width, height}
-void TextDrawer::putAlignCenter(cv::Mat& img, cv::Rect rect, const char* str, const cv::Vec4b& color) {
+void TextDrawer::putAlignCenter(cv::Mat& img, cv::Rect rect, const char* str, intUnion color) {
     int codePoint = '?';
     int H = 1, W = 0, W_cnt = 0;
     const auto len = strlen(str);
@@ -120,7 +120,7 @@ void TextDrawer::putAlignCenter(cv::Mat& img, cv::Rect rect, const char* str, co
 }
 
 //Rect {x, y, width, height}
-void TextDrawer::putAlignLeft(cv::Mat& img, cv::Rect rect, const char* str, const cv::Vec4b& color) {
+void TextDrawer::putAlignLeft(cv::Mat& img, cv::Rect rect, const char* str, intUnion color) {
     if (!hasInit) {
         Init(IDR_TTF_DEFAULT, L"TTF");
         hasInit = true;
@@ -193,7 +193,7 @@ void TextDrawer::Init(unsigned int idi, const wchar_t* type) {
     asciiCache.resize(256);
 }
 
-int TextDrawer::putWord(cv::Mat& img, int x, int y, const int codePoint, const cv::Vec4b& color) {
+int TextDrawer::putWord(cv::Mat& img, int x, int y, const int codePoint, intUnion color) {
     int c_x0, c_y0, c_x1, c_y1;
     stbtt_GetCodepointBitmapBox(&info, codePoint, scale, scale, &c_x0, &c_y0, &c_x1, &c_y1);
 

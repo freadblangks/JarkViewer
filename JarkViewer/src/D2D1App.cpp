@@ -1,5 +1,74 @@
 #include "D2D1App.h"
 
+namespace {
+
+enum class PreferredAppMode {
+    Default = 0,
+    AllowDark = 1,
+    ForceDark = 2,
+    ForceLight = 3,
+    Max = 4
+};
+
+using SetPreferredAppModeFn = PreferredAppMode(WINAPI*)(PreferredAppMode appMode);
+using FlushMenuThemesFn = void (WINAPI*)();
+
+struct MenuThemeApi {
+    SetPreferredAppModeFn setPreferredAppMode = nullptr;
+    FlushMenuThemesFn flushMenuThemes = nullptr;
+};
+
+const MenuThemeApi& GetMenuThemeApi() {
+    static const MenuThemeApi api = []() {
+        MenuThemeApi result;
+        HMODULE module = GetModuleHandleW(L"uxtheme.dll");
+        if (!module) {
+            module = LoadLibraryW(L"uxtheme.dll");
+        }
+        if (!module) {
+            return result;
+        }
+
+        result.setPreferredAppMode = reinterpret_cast<SetPreferredAppModeFn>(GetProcAddress(module, MAKEINTRESOURCEA(135)));
+        result.flushMenuThemes = reinterpret_cast<FlushMenuThemesFn>(GetProcAddress(module, MAKEINTRESOURCEA(136)));
+        return result;
+    }();
+    return api;
+}
+
+class PopupMenuThemeScope {
+public:
+    explicit PopupMenuThemeScope(bool useDarkTheme) {
+        const auto& api = GetMenuThemeApi();
+        if (!api.setPreferredAppMode || !api.flushMenuThemes) {
+            return;
+        }
+
+        setPreferredAppMode_ = api.setPreferredAppMode;
+        flushMenuThemes_ = api.flushMenuThemes;
+        previousMode_ = setPreferredAppMode_(useDarkTheme ? PreferredAppMode::ForceDark : PreferredAppMode::ForceLight);
+        flushMenuThemes_();
+        isActive_ = true;
+    }
+
+    ~PopupMenuThemeScope() {
+        if (!isActive_) {
+            return;
+        }
+
+        setPreferredAppMode_(previousMode_);
+        flushMenuThemes_();
+    }
+
+private:
+    bool isActive_ = false;
+    PreferredAppMode previousMode_ = PreferredAppMode::Default;
+    SetPreferredAppModeFn setPreferredAppMode_ = nullptr;
+    FlushMenuThemesFn flushMenuThemes_ = nullptr;
+};
+
+}
+
 D2D1App::D2D1App() {
     loadSettings();
     m_parameters.DirtyRectsCount = 0;
@@ -128,17 +197,16 @@ HRESULT D2D1App::Initialize(HINSTANCE hInstance) {
     hr = m_hWnd ? S_OK : E_FAIL;
     
     // 显示窗口
-    if (SUCCEEDED(hr))
-    {
+    if (SUCCEEDED(hr)) {
         CreateDeviceIndependentResources();
         CreateDeviceResources();
 
         DragAcceptFiles(m_hWnd, TRUE);
 
         GlobalVar::isSystemDarkMode = jarkUtils::getSystemDarkMode();
-        GlobalVar::CURRENT_UI_MODE = GlobalVar::settingParameter.UI_Mode == 0 ? (GlobalVar::isSystemDarkMode ? 2 : 1) : GlobalVar::settingParameter.UI_Mode;
+        GlobalVar::isCurrentUIDarkMode = GlobalVar::settingParameter.UI_Mode == 0 ? GlobalVar::isSystemDarkMode : (GlobalVar::settingParameter.UI_Mode == 2);
 
-        BOOL themeMode = GlobalVar::CURRENT_UI_MODE == 1 ? 0 : 1;
+        BOOL themeMode = GlobalVar::isCurrentUIDarkMode;
         DwmSetWindowAttribute(m_hWnd, DWMWINDOWATTRIBUTE::DWMWA_USE_IMMERSIVE_DARK_MODE, &themeMode, sizeof(BOOL));
 
         ShowWindow(m_hWnd, GlobalVar::settingParameter.showCmd == SW_NORMAL ? SW_NORMAL : SW_MAXIMIZE);
@@ -473,7 +541,7 @@ LRESULT D2D1App::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
     case WM_SETTINGCHANGE:
         GlobalVar::isSystemDarkMode = jarkUtils::getSystemDarkMode();
-        GlobalVar::CURRENT_UI_MODE = GlobalVar::settingParameter.UI_Mode == 0 ? (GlobalVar::isSystemDarkMode ? 2 : 1) : GlobalVar::settingParameter.UI_Mode;
+        GlobalVar::isCurrentUIDarkMode = GlobalVar::settingParameter.UI_Mode == 0 ? GlobalVar::isSystemDarkMode : (GlobalVar::settingParameter.UI_Mode == 2);
         GlobalVar::isNeedUpdateTheme = true;
         break;
 
@@ -535,6 +603,7 @@ void D2D1App::ShowContextMenu(HWND hwnd, int x, int y) {
     POINT pt = { x, y };
     ClientToScreen(hwnd, &pt);
 
+    PopupMenuThemeScope popupMenuThemeScope(GlobalVar::isCurrentUIDarkMode);
     UINT flags = TPM_RIGHTBUTTON | TPM_RETURNCMD | TPM_NONOTIFY;
     DWORD cmd = TrackPopupMenuEx(hMenu, flags, pt.x, pt.y, hwnd, NULL);
 
