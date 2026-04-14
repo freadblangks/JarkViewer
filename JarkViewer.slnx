@@ -5,6 +5,7 @@
   </Configurations>
   <Folder Name="/解决方案项/">
     <File Path="AGENTS.md" />
+    <File Path="CLAUDE.md" />
     <File Path="README.md" />
     <File Path="README_EN.md" />
   </Folder>
@@ -12,5 +13,6 @@
     <BuildType Solution="Release|x86" Project="Debug" />
     <Platform Project="x64" />
     <Build Solution="*|x86" Project="false" />
+    <Deploy Solution="*|x64" />
   </Project>
 </Solution>
